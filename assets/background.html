@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>3D Background Kartu</title>
+    <style>
+      html, body {
+        margin: 0;
+        overflow: hidden;
+        background: transparent;
+      }
+      canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.164.0/build/three.module.js";
+      import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.164.0/examples/jsm/loaders/GLTFLoader.js";
+
+      // Inisialisasi scene, kamera, renderer
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setClearColor(0x000000, 0); // transparan
+      document.body.appendChild(renderer.domElement);
+
+      // Pencahayaan lembut
+      const light = new THREE.AmbientLight(0xffffff, 1.5);
+      scene.add(light);
+
+      const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+      dirLight.position.set(3, 3, 5);
+      scene.add(dirLight);
+
+      // Tambahkan model kartu (default ace_heart)
+      const loader = new GLTFLoader();
+      let model;
+
+      loader.load("/assets/models/ace_heart.glb", (gltf) => {
+        model = gltf.scene;
+        model.scale.set(1.5, 1.5, 1.5);
+        model.position.set(0, 0, 0);
+        scene.add(model);
+      }, undefined, (error) => {
+        console.error("Error memuat model:", error);
+      });
+
+      camera.position.z = 3;
+
+      // Animasi lembut berputar
+      function animate() {
+        requestAnimationFrame(animate);
+        if (model) {
+          model.rotation.y += 0.01;
+          model.rotation.x = Math.sin(Date.now() * 0.001) * 0.1;
+        }
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      // Responsif terhadap ukuran layar
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    </script>
+  </body>
+</html>
